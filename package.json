@@ -1,0 +1,16 @@
+{
+  "name": "rinnai-dss-monitor",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "nodejs-websocket": "^1.7.1",
+    "ws": "^2.2.0",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "npm run start rin-dss",
+    "stop": "killall -SIGINT node app.js rin-dss"
+  },
+  "devDependencies": {}
+}
