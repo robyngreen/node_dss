@@ -12,5 +12,8 @@
     "dev": "npm run start rin-dss",
     "stop": "killall -SIGINT node app.js rin-dss"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "engines": {
+    "node": "7.6.0"
+  }
 }
