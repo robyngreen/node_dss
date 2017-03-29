@@ -1,37 +1,77 @@
 'use strict';
 
 const WebSocket = require('ws');
+let timer = '';
+
+/**
+ * Takes stream key found within the response and creates a new websocket.
+ *
+ * @param {object} response
+ *  - Object containing details about subscription status.
+ *
+ * @return {undefined}
+ */
+function newWebSocket(response) {
+  const streamKey = response.subscription.stream_key;
+  const aylaStreamServiceURL = `https://stream.aylanetworks.com/stream?stream_key=${ streamKey }`;
+  const ws = new WebSocket(aylaStreamServiceURL);
+
+  ws.on('open', function open() {
+    console.info('=== websocket opened ===');
+
+    // Clear the timer if it's set.
+    if (timer) {
+      clearInterval(timer);
+    }
+  });
+
+  ws.on('message', function incoming(data) {
+    console.info('====== message received ======');
+
+    // Format the data into a useable array.
+    const messageData = data.split('|');
+
+    // If the first message element is a "1" then this is a heartbeat and
+    // not actual data. Respond to the service so it knows we're listening.
+    if (messageData[0] === '1') {
+      // The service needs us to reply to the heartbeat in order to
+      // keep the websocket open.
+      ws.send(messageData[1], (error) => {
+        // If error is not defined, the send has been completed,
+        // otherwise the error object will indicate what failed.
+        if (error === undefined) {
+          console.log(`Message sent: ${ messageData[1] }`);
+        }
+        else {
+          console.error(`Error: ${ error }`);
+        }
+      });
+    }
+    // If the message has actual data, ping another service with the
+    // relevant information.
+    else {
+      const messageInfo = JSON.parse(messageData[1]);
+      // @todo: Ping third party with message data.
+      // http://rinnai.mcdev/api/dss/VXRINNAI0000001/WH1_INF_UNT_ECC?_format=json
+      // http://rinnai.mcdev/api/dss/{dsn}/{property_name}?_format=json
+      console.log(`dsn: ${ messageInfo.metadata.dsn }`);
+      console.log(`property_name: ${ messageInfo.metadata.property_name }`);
+    }
+  });
+
+  ws.on('close', function close() {
+    console.warn('=== websocket closed ===');
+
+    // Attempt to reconnect to the service.
+    // Try every 30 seconds per Ayla recommendations.
+    timer = setInterval(() => {
+      console.log('attempting to reconnect...');
+      newWebSocket(response);
+    }, 30000);
+  });
+}
 
 // Export our tasks.
 module.exports = {
-
-  /**
-   * Takes stream key found within the response and creates a new websocket.
-   *
-   * @param {object} response
-   *  - Object containing details about subscription status.
-   *
-   * @return {undefined}
-   */
-  start: function(response) {
-    const streamKey = response.subscription.stream_key;
-    const aylaStreamServiceURL = `https://stream.aylanetworks.com/stream?stream_key=${ streamKey }`;
-    const ws = new WebSocket(aylaStreamServiceURL);
-
-    ws.on('open', function open() {
-      // Do something here if opened.
-      console.log('=== websocket opened ===');
-    });
-
-    ws.onmessage = function (event) {
-      // @todo: look for HEARTBEAT and reply if it's received.
-      // flags.binary will be set if a binary data is received.
-      // flags.masked will be set if the data was masked.
-      console.info('====== ws on message: ======');
-      //const eventData = JSON.parse(event.data);
-      // JSON.parse errors out because of a `470|{"seq":"0",`
-      // in front of everything.
-      console.info(event.data);
-    };
-  }
+  start: (response) => newWebSocket(response)
 };
