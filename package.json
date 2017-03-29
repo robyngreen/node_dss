@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "nconf": "^0.8.4",
     "ws": "^2.2.2",
     "xmlhttprequest": "^1.8.0"
   },
