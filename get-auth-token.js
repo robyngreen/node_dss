@@ -1,6 +1,7 @@
 'use strict';
 
 const xhrObject = require('xmlhttprequest');
+const nconf = require('nconf');
 
 // Export our tasks.
 module.exports = {
@@ -17,14 +18,16 @@ module.exports = {
   getAuthToken: function() {
     return new Promise (
       function (resolve, reject) {
-        var xhr = new xhrObject.XMLHttpRequest();
+        const xhr = new xhrObject.XMLHttpRequest();
 
-        // @todo: Store these in config.
-        var user = '';
-        var pass = '';
-        var authURL = 'https://user.aylanetworks.com/users/sign_in.json';
-        var appID = '';
-        var appSecret = '';
+        // Pull in user auth config stored in config.json.
+        const userAuth = nconf.get('userAuth');
+
+        const user = userAuth.user;
+        const pass = userAuth.pass;
+        const authURL = userAuth.authURL;
+        const appID = userAuth.appID;
+        const appSecret = userAuth.appSecret;
 
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4) {

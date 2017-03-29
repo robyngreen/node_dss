@@ -1,6 +1,7 @@
 'use strict';
 
 const xhrObject = require('xmlhttprequest');
+const nconf = require('nconf');
 
 // Export our tasks.
 module.exports = {
@@ -17,26 +18,28 @@ module.exports = {
   check: function(tokenData) {
     return new Promise (
       function (resolve, reject) {
-        var aylaSubURL = 'https://stream.aylanetworks.com/api/v1/subscriptions';
-        var xhr = new xhrObject.XMLHttpRequest();
-        xhr.open('POST', aylaSubURL, true);
+        // Pull in user auth config stored in config.json.
+        const subscription = nconf.get('subscription');
+
+        const xhr = new xhrObject.XMLHttpRequest();
+        xhr.open('POST', subscription.subscriptionUrl, true);
         // This changes daily.
         xhr.setRequestHeader('Authorization', `auth_token ${ tokenData.access_token }`);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        var data = {
-          'name': 'testing',
-          'description': 'testinging',
-          'oem': 'd3ff9b61',
-          //'oem_model': 'OTEST',
-          //'oem_model': 'RWM101',
-          'oem_model': 'RWM101-dev',
-          'dsn': '*',
-          'property_name': 'WH1_INF_UNT_ECC,WH1_INF_UNT_ECW,WH1_INF_UNT_MMP',
-          'batch_size': 1,
-          'client_type': 'cloud',
-          'subscription_type': 'datapoint'
+
+        const data = {
+          'name': subscription.name,
+          'description': subscription.description,
+          'oem': subscription.oem,
+          'oem_model': subscription.oemModel,
+          'dsn': subscription.dsn,
+          'property_name': subscription.propertyName,
+          'batch_size': subscription.batchSize,
+          'client_type': subscription.clientType,
+          'subscription_type': subscription.subscriptionType
         };
         xhr.send(JSON.stringify(data));
+
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4) {
             // We're checking for a "created" status vs an "OK" status.

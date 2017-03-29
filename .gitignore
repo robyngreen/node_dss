@@ -1,0 +1,3 @@
+# Ignore config files but NOT .gitkeep.
+config/*
+!config/.gitkeep
