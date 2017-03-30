@@ -1,3 +1,6 @@
 # Ignore config files but NOT .gitkeep.
 config/*
 !config/.gitkeep
+
+# Ignore errors thrown by npm.
+npm-debug.log
