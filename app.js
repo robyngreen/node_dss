@@ -12,9 +12,9 @@ var http = require('http');
 var fs = require('fs');
 var nconf = require('nconf');
 var html = fs.readFileSync('./index.html');
-var token = require('./get-auth-token');
-var subscription = require('./subscription');
-var websocket = require('./websocket');
+var token = require('./lib/get-auth-token');
+var subscription = require('./lib/subscription');
+var websocket = require('./lib/websocket');
 
 /**
  * Setup nconf to use (in-order):
@@ -27,10 +27,6 @@ var websocket = require('./websocket');
 nconf.argv()
   .env()
   .file('config/config.json');
-
-var log = function(entry) {
-  //fs.appendFileSync('/tmp/sample-app.log', new Date().toISOString() + ' - ' + entry + '\n');
-};
 
 // Main server.
 var server = http.createServer(function (req, res) {
