@@ -28,10 +28,6 @@ nconf.argv()
   .env()
   .file('config/config.json');
 
-var log = function(entry) {
-  //fs.appendFileSync('/tmp/sample-app.log', new Date().toISOString() + ' - ' + entry + '\n');
-};
-
 // Main server.
 var server = http.createServer(function (req, res) {
   if (req.method === 'POST') {
