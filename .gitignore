@@ -4,3 +4,6 @@ config/*
 
 # Ignore errors thrown by npm.
 npm-debug.log
+
+# Keep the htpasswd file out of the repo.
+htpasswd
