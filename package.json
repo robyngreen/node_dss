@@ -5,13 +5,16 @@
   "dependencies": {
     "http-auth": "^3.1.3",
     "nconf": "^0.8.4",
+    "next": "^2.0.1",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
     "ws": "^2.2.2",
     "xmlhttprequest": "^1.8.0"
   },
   "scripts": {
-    "start": "node app.js",
-    "dev": "npm run start rin-dss",
-    "stop": "killall -SIGINT node app.js rin-dss"
+    "dev": "node server.js",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js"
   },
   "devDependencies": {},
   "engines": {

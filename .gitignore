@@ -4,3 +4,13 @@ config/*
 
 # Ignore errors thrown by npm.
 npm-debug.log
+
+# Ignore node modules.
+node_modules
+
+# Ignore Next.js specific files.
+# https://github.com/zeit/next.js#production-deployment
+.next
+
+# Ignore htpasswd
+htpasswd
