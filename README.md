@@ -14,4 +14,4 @@ If you haven't, add the local config and htpasswd files not in the repo.
 
 Start up the server.
 
-`npm start`
+`npm watch`
