@@ -28,20 +28,6 @@ nconf.argv()
   .file('config/config.json');
 
 /**
- * Get auth token and use it to start a new websocket.
- */
-token.getAuthToken()
-  .then((response) => {
-    return subscription.check(response);
-  })
-  .then((response) => {
-    websocket.start(response);
-  })
-  .catch(function (reason) {
-    console.error(reason);
-  });
-
-/**
  * Authentication setup.
  */
 const digest = auth.digest({
@@ -54,15 +40,46 @@ const digest = auth.digest({
  */
 app.prepare()
   .then(() => {
-    http.createServer(digest, (req, res) => {
-      const parsedUrl = parse(req.url, true);
-      handle(req, res, parsedUrl);
-    })
-    .listen(3000, (err) => {
-      if (err) {
-        console.error('error');
-        throw err;
-      }
-      console.log('> Ready on http://localhost:3000');
-    });
+    let newServer = null;
+
+    if (nconf.get('bypassHtauth') === true) {
+      newServer = http.createServer(digest, (req, res) => {
+        const parsedUrl = parse(req.url, true);
+        handle(req, res, parsedUrl);
+      })
+      .listen(3000, (err) => {
+        if (err) {
+          console.error('error');
+          throw err;
+        }
+        console.log('> Ready on http://localhost:3000');
+      });
+    }
+    else {
+      newServer = http.createServer((req, res) => {
+        const parsedUrl = parse(req.url, true);
+        handle(req, res, parsedUrl);
+      })
+      .listen(3000, (err) => {
+        if (err) {
+          console.error('error');
+          throw err;
+        }
+        console.log('> Ready on http://localhost:3000');
+      });
+    }
+
+    /**
+     * Get auth token and use it to start a new websocket.
+     */
+    token.getAuthToken()
+      .then((response) => {
+        return subscription.check(response);
+      })
+      .then((response) => {
+        websocket.start(response, newServer);
+      })
+      .catch(function (reason) {
+        console.error(reason);
+      });
   });
