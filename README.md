@@ -8,4 +8,4 @@ Use the specified version of Node via NVM.
 
 Start up the server.
 
-`npm start`
+`npm watch`

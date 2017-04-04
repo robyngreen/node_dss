@@ -12,7 +12,7 @@
     "xmlhttprequest": "^1.8.0"
   },
   "scripts": {
-    "dev": "node server.js",
+    "watch": "node server.js",
     "build": "next build",
     "start": "NODE_ENV=production node server.js"
   },
