@@ -1,7 +1,5 @@
 import React from 'react';
-
-// eslint-disable-next-line no-undef
-// const ws = new WebSocket('ws://localhost:8080');
+let timer = '';
 
 export default class Status extends React.Component {
   constructor () {
@@ -10,6 +8,7 @@ export default class Status extends React.Component {
     this.addErrorCode = this.addErrorCode.bind(this);
     this.updateStatus = this.updateStatus.bind(this);
     this.updateResponseTime = this.updateResponseTime.bind(this);
+    this.setupWebSocket = this.setupWebSocket.bind(this);
 
     // Get initial state.
     this.state = {
@@ -19,10 +18,11 @@ export default class Status extends React.Component {
     };
   }
 
-  componentDidMount () {
-    // eslint-disable-next-line no-undef
+  setupWebSocket () {
     // @todo: This may need to reflect the actual server URL.
+    // eslint-disable-next-line no-undef
     const ws = new WebSocket('ws://localhost:8080');
+
     ws.onmessage = (message) => {
       console.log('======== Message received ========');
 
@@ -43,10 +43,13 @@ export default class Status extends React.Component {
       }
 
       if (data.responseTime !== undefined) {
-        console.log(data.responseTime);
         this.updateResponseTime(data.responseTime);
       }
     };
+  }
+
+  componentDidMount () {
+    this.setupWebSocket();
   }
 
   addErrorCode (code) {
@@ -55,6 +58,21 @@ export default class Status extends React.Component {
   }
 
   updateStatus (status) {
+    // If connection is false, try to reconnect.
+    if (status === false) {
+      // Try every 30 seconds.
+      timer = setInterval(() => {
+        console.log('attempting to reconnect...');
+        // Attempt to connect again.
+        this.setupWebSocket();
+      }, 30000);
+    }
+    // Else stop trying to reconnect.
+    // Clear the timer if it's set.
+    else if (timer) {
+      clearInterval(timer);
+    }
+
     // Update state.
     this.setState({ connectionStatus: status });
   }
@@ -68,11 +86,15 @@ export default class Status extends React.Component {
     return (
       <main className='main'>
         <h1>{ this.props.title }</h1>
-        <h2>Status: { (this.state.connectionStatus === true) ? 'Online' : 'Offline' }</h2>
+        <h2>{ (this.state.connectionStatus) ? 'Online: Connected to Ayla' : 'Offline: No connection from Ayla' }</h2>
         <p>Last Error Code: { this.state.errorCode.displayName }</p>
         <p>DSN: { this.state.errorCode.dsn }</p>
         <p>Value: { this.state.errorCode.value }</p>
-        <small>Responded in { Math.floor(this.state.lastResponseTime * 0.001) } seconds</small>
+        <small>{
+          (this.state.connectionStatus) ?
+            `Responded in ${ Math.floor(this.state.lastResponseTime * 0.001) } seconds`
+            : 'Offline'
+        }</small>
         <style jsx>{`
           .main {
             font: 16px Helvetica, Arial;
@@ -89,6 +111,6 @@ export default class Status extends React.Component {
           }
         `}</style>
       </main>
-    )
+    );
   }
-};
+}
