@@ -42,7 +42,7 @@ app.prepare()
   .then(() => {
     let newServer = null;
 
-    if (nconf.get('bypassHtauth') === true) {
+    if (nconf.get('bypassHtauth') === false) {
       newServer = http.createServer(digest, (req, res) => {
         const parsedUrl = parse(req.url, true);
         handle(req, res, parsedUrl);
