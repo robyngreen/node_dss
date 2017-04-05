@@ -1,7 +1,6 @@
 'use strict';
 
-const http = require('http');
-const { parse } = require('url');
+const express = require('express');
 const auth = require('http-auth');
 const nconf = require('nconf');
 const path = require('path');
@@ -40,34 +39,27 @@ const digest = auth.digest({
  */
 app.prepare()
   .then(() => {
-    let newServer = null;
+    const newServer = express();
 
+    // If http-auth isn't bypassed, lock the server down.
     if (nconf.get('bypassHtauth') === false) {
-      newServer = http.createServer(digest, (req, res) => {
-        const parsedUrl = parse(req.url, true);
-        handle(req, res, parsedUrl);
-      })
-      .listen(3000, (err) => {
-        if (err) {
-          console.error('error');
-          throw err;
-        }
-        console.log('> Ready on http://localhost:3000');
-      });
+      newServer.use(auth.connect(digest));
     }
-    else {
-      newServer = http.createServer((req, res) => {
-        const parsedUrl = parse(req.url, true);
-        handle(req, res, parsedUrl);
-      })
-      .listen(3000, (err) => {
-        if (err) {
-          console.error('error');
-          throw err;
-        }
-        console.log('> Ready on http://localhost:3000');
-      });
-    }
+
+    newServer.get('/api/v1/restart', (req, res) => {
+      res.status(200).json({ test: 'message' });
+    });
+
+    newServer.get('*', (req, res) => {
+      return handle(req, res);
+    });
+
+    newServer.listen(3000, (err) => {
+      if (err) {
+        throw err;
+      }
+      console.log('> Ready on http://localhost:3000');
+    });
 
     /**
      * Get auth token and use it to start a new websocket.
