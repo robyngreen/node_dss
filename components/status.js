@@ -65,8 +65,7 @@ export default class Status extends React.Component {
         }
         return response.json();
       })
-      .then((response) => {
-        console.log(response);
+      .then(() => {
         // Reconnect client websocket.
         this.setupWebSocket();
       });
