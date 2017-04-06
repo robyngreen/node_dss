@@ -25,9 +25,9 @@ export default class Status extends React.Component {
   setupWebSocket () {
     // @todo: This may need to reflect the actual server URL.
     // eslint-disable-next-line no-undef
-    const ws = new WebSocket('ws://localhost:8080');
+    this.ws = new WebSocket('ws://localhost:8080');
 
-    ws.onmessage = (message) => {
+    this.ws.onmessage = (message) => {
       console.log('======== Message received ========');
 
       const data = JSON.parse(message.data);
@@ -50,12 +50,10 @@ export default class Status extends React.Component {
         this.updateResponseTime(data.responseTime);
       }
     };
-
-    return ws;
   }
 
   componentDidMount () {
-    this.ws = this.setupWebSocket();
+    this.setupWebSocket();
   }
 
   sendMessage () {
@@ -73,8 +71,15 @@ export default class Status extends React.Component {
     // If connection is false, try to reconnect.
     if (status === false) {
       // Try every 30 seconds.
+      let timerCounter = 0;
       timer = setInterval(() => {
-        console.log('attempting to reconnect...');
+        timerCounter++;
+        console.log(`attempting to reconnect...${ timerCounter }`);
+        // Limit the retries to 5.
+        // Also clear the timer if the status is now true.
+        if (timerCounter === 5 || this.state.status === true) {
+          clearInterval(timer);
+        }
         // Attempt to connect again.
         this.setupWebSocket();
       }, 30000);
@@ -102,12 +107,13 @@ export default class Status extends React.Component {
         <p>Last Error Code: { this.state.errorCode.displayName }</p>
         <p>DSN: { this.state.errorCode.dsn }</p>
         <p>Value: { this.state.errorCode.value }</p>
-        <small>{
+        <p><small>{
           (this.state.connectionStatus) ?
-            `Responded in ${ Math.floor(this.state.lastResponseTime * 0.001) } seconds`
+            `Last response from Ayla took ${ Math.floor(this.state.lastResponseTime * 0.001) } seconds`
             : 'Offline'
-        }</small>
-        <Button addClasses='btn' clickEvent={ this.sendMessage }>Test Text</Button>
+        }</small></p>
+        { this.state.connectionStatus && <Button addClasses='btn' clickEvent={ this.sendMessage }>Send Test Message</Button> }
+        { !this.state.connectionStatus && <Button addClasses='btn' clickEvent={ this.setupWebSocket }>Reconnect</Button> }
         <style jsx>{`
           .main {
             font: 16px Helvetica, Arial;

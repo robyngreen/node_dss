@@ -8,6 +8,7 @@ const Button = ( props ) => {
           display: block;
           border: 0;
           padding: 0.5rem 1rem;
+          margin-bottom: 1rem;
           text-align: center;
           background-color: #CCC;
           cursor: pointer;
