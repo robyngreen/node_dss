@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from './button';
 let timer = '';
 
 export default class Status extends React.Component {
@@ -9,6 +10,9 @@ export default class Status extends React.Component {
     this.updateStatus = this.updateStatus.bind(this);
     this.updateResponseTime = this.updateResponseTime.bind(this);
     this.setupWebSocket = this.setupWebSocket.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+
+    this.ws = null;
 
     // Get initial state.
     this.state = {
@@ -46,10 +50,18 @@ export default class Status extends React.Component {
         this.updateResponseTime(data.responseTime);
       }
     };
+
+    return ws;
   }
 
   componentDidMount () {
-    this.setupWebSocket();
+    this.ws = this.setupWebSocket();
+  }
+
+  sendMessage () {
+    this.ws.send(JSON.stringify({
+      status: 'test'
+    }));
   }
 
   addErrorCode (code) {
@@ -95,6 +107,7 @@ export default class Status extends React.Component {
             `Responded in ${ Math.floor(this.state.lastResponseTime * 0.001) } seconds`
             : 'Offline'
         }</small>
+        <Button addClasses='btn' clickEvent={ this.sendMessage }>Test Text</Button>
         <style jsx>{`
           .main {
             font: 16px Helvetica, Arial;

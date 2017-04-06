@@ -47,7 +47,8 @@ app.prepare()
     }
 
     newServer.get('/api/v1/restart', (req, res) => {
-      res.status(200).json({ test: 'message' });
+      // respond with server restarted or error.
+      res.status(200).json({ test: 'server restarted' });
     });
 
     newServer.get('*', (req, res) => {
