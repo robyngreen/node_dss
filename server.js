@@ -1,7 +1,6 @@
 'use strict';
 
-const http = require('http');
-const { parse } = require('url');
+const express = require('express');
 const auth = require('http-auth');
 const nconf = require('nconf');
 const path = require('path');
@@ -11,9 +10,7 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 global.appRoot = path.resolve(__dirname);
-const token = require('./lib/get-auth-token');
-const subscription = require('./lib/subscription');
-const websocket = require('./lib/websocket');
+const connectService = require('./lib/connect-service');
 
 /**
  * Setup nconf to use (in-order):
@@ -40,46 +37,39 @@ const digest = auth.digest({
  */
 app.prepare()
   .then(() => {
-    let newServer = null;
+    const newServer = express();
 
+    // If http-auth isn't bypassed, lock the server down.
     if (nconf.get('bypassHtauth') === false) {
-      newServer = http.createServer(digest, (req, res) => {
-        const parsedUrl = parse(req.url, true);
-        handle(req, res, parsedUrl);
-      })
-      .listen(3000, (err) => {
-        if (err) {
-          console.error('error');
-          throw err;
-        }
-        console.log('> Ready on http://localhost:3000');
-      });
+      newServer.use(auth.connect(digest));
     }
-    else {
-      newServer = http.createServer((req, res) => {
-        const parsedUrl = parse(req.url, true);
-        handle(req, res, parsedUrl);
-      })
-      .listen(3000, (err) => {
-        if (err) {
-          console.error('error');
-          throw err;
-        }
-        console.log('> Ready on http://localhost:3000');
-      });
-    }
+
+    newServer.get('/api/v1/restart', (req, res) => {
+      // respond with server restarted or error.
+      connectService
+        .start(newServer)
+        .then((response) => {
+          res.status(200).json(response);
+        });
+    });
+
+    newServer.get('*', (req, res) => {
+      return handle(req, res);
+    });
+
+    newServer.listen(3000, (err) => {
+      if (err) {
+        throw err;
+      }
+      console.log('> Ready on http://localhost:3000');
+    });
 
     /**
      * Get auth token and use it to start a new websocket.
      */
-    token.getAuthToken()
+    connectService
+      .start(newServer)
       .then((response) => {
-        return subscription.check(response);
-      })
-      .then((response) => {
-        websocket.start(response, newServer);
-      })
-      .catch(function (reason) {
-        console.error(reason);
+        console.log(response);
       });
   });

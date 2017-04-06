@@ -1,4 +1,7 @@
 import React from 'react';
+import 'es6-promise/auto';
+import 'isomorphic-fetch';
+import Button from './button';
 let timer = '';
 
 export default class Status extends React.Component {
@@ -9,6 +12,10 @@ export default class Status extends React.Component {
     this.updateStatus = this.updateStatus.bind(this);
     this.updateResponseTime = this.updateResponseTime.bind(this);
     this.setupWebSocket = this.setupWebSocket.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+    this.reconnectServices = this.reconnectServices.bind(this);
+
+    this.ws = null;
 
     // Get initial state.
     this.state = {
@@ -21,9 +28,9 @@ export default class Status extends React.Component {
   setupWebSocket () {
     // @todo: This may need to reflect the actual server URL.
     // eslint-disable-next-line no-undef
-    const ws = new WebSocket('ws://localhost:8080');
+    this.ws = new WebSocket('ws://localhost:8080');
 
-    ws.onmessage = (message) => {
+    this.ws.onmessage = (message) => {
       console.log('======== Message received ========');
 
       const data = JSON.parse(message.data);
@@ -48,8 +55,30 @@ export default class Status extends React.Component {
     };
   }
 
+  reconnectServices () {
+    // Reconnect the backend service.
+    // eslint-disable-next-line no-undef
+    fetch('/api/v1/restart')
+      .then((response) => {
+        if (response.status >= 400) {
+          throw new Error('Bad response from server');
+        }
+        return response.json();
+      })
+      .then(() => {
+        // Reconnect client websocket.
+        this.setupWebSocket();
+      });
+  }
+
   componentDidMount () {
     this.setupWebSocket();
+  }
+
+  sendMessage () {
+    this.ws.send(JSON.stringify({
+      status: 'test'
+    }));
   }
 
   addErrorCode (code) {
@@ -61,8 +90,15 @@ export default class Status extends React.Component {
     // If connection is false, try to reconnect.
     if (status === false) {
       // Try every 30 seconds.
+      let timerCounter = 0;
       timer = setInterval(() => {
-        console.log('attempting to reconnect...');
+        timerCounter++;
+        console.log(`attempting to reconnect...${ timerCounter }`);
+        // Limit the retries to 5.
+        // Also clear the timer if the status is now true.
+        if (timerCounter === 5 || this.state.status === true) {
+          clearInterval(timer);
+        }
         // Attempt to connect again.
         this.setupWebSocket();
       }, 30000);
@@ -90,11 +126,13 @@ export default class Status extends React.Component {
         <p>Last Error Code: { this.state.errorCode.displayName }</p>
         <p>DSN: { this.state.errorCode.dsn }</p>
         <p>Value: { this.state.errorCode.value }</p>
-        <small>{
+        <p><small>{
           (this.state.connectionStatus) ?
-            `Responded in ${ Math.floor(this.state.lastResponseTime * 0.001) } seconds`
+            `Last response from Ayla took ${ Math.floor(this.state.lastResponseTime * 0.001) } seconds`
             : 'Offline'
-        }</small>
+        }</small></p>
+        { this.state.connectionStatus && <Button addClasses='btn' clickEvent={ this.sendMessage }>Send Test Message</Button> }
+        { !this.state.connectionStatus && <Button addClasses='btn' clickEvent={ this.reconnectServices }>Reconnect Services</Button> }
         <style jsx>{`
           .main {
             font: 16px Helvetica, Arial;
