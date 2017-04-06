@@ -1,4 +1,6 @@
 import React from 'react';
+import 'es6-promise/auto';
+import 'isomorphic-fetch';
 import Button from './button';
 let timer = '';
 
@@ -11,6 +13,7 @@ export default class Status extends React.Component {
     this.updateResponseTime = this.updateResponseTime.bind(this);
     this.setupWebSocket = this.setupWebSocket.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
+    this.reconnectServices = this.reconnectServices.bind(this);
 
     this.ws = null;
 
@@ -50,6 +53,23 @@ export default class Status extends React.Component {
         this.updateResponseTime(data.responseTime);
       }
     };
+  }
+
+  reconnectServices () {
+    // Reconnect the backend service.
+    // eslint-disable-next-line no-undef
+    fetch('/api/v1/restart')
+      .then((response) => {
+        if (response.status >= 400) {
+          throw new Error('Bad response from server');
+        }
+        return response.json();
+      })
+      .then((response) => {
+        console.log(response);
+        // Reconnect client websocket.
+        this.setupWebSocket();
+      });
   }
 
   componentDidMount () {
@@ -113,7 +133,7 @@ export default class Status extends React.Component {
             : 'Offline'
         }</small></p>
         { this.state.connectionStatus && <Button addClasses='btn' clickEvent={ this.sendMessage }>Send Test Message</Button> }
-        { !this.state.connectionStatus && <Button addClasses='btn' clickEvent={ this.setupWebSocket }>Reconnect</Button> }
+        { !this.state.connectionStatus && <Button addClasses='btn' clickEvent={ this.reconnectServices }>Reconnect Services</Button> }
         <style jsx>{`
           .main {
             font: 16px Helvetica, Arial;

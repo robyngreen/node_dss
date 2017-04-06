@@ -10,9 +10,7 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 global.appRoot = path.resolve(__dirname);
-const token = require('./lib/get-auth-token');
-const subscription = require('./lib/subscription');
-const websocket = require('./lib/websocket');
+const connectService = require('./lib/connect-service');
 
 /**
  * Setup nconf to use (in-order):
@@ -48,7 +46,11 @@ app.prepare()
 
     newServer.get('/api/v1/restart', (req, res) => {
       // respond with server restarted or error.
-      res.status(200).json({ test: 'server restarted' });
+      connectService
+        .start(newServer)
+        .then((response) => {
+          res.status(200).json(response);
+        });
     });
 
     newServer.get('*', (req, res) => {
@@ -65,14 +67,9 @@ app.prepare()
     /**
      * Get auth token and use it to start a new websocket.
      */
-    token.getAuthToken()
+    connectService
+      .start(newServer)
       .then((response) => {
-        return subscription.check(response);
-      })
-      .then((response) => {
-        websocket.start(response, newServer);
-      })
-      .catch(function (reason) {
-        console.error(reason);
+        console.log(response);
       });
   });
