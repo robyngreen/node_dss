@@ -33,10 +33,9 @@ export default class Status extends React.Component {
     };
   }
 
-  setupWebSocket () {
-    // @todo: This may need to reflect the actual server URL.
+  setupWebSocket (host) {
     // eslint-disable-next-line no-undef
-    this.ws = new WebSocket('ws://localhost:8080');
+    this.ws = new WebSocket('ws://' + host + ':8080');
 
     this.ws.onmessage = (message) => {
       console.log('======== Message received ========');
@@ -80,7 +79,9 @@ export default class Status extends React.Component {
   }
 
   componentDidMount () {
-    this.setupWebSocket();
+    // eslint-disable-next-line no-undef
+    const host = window.document.location.host.replace(/:.*/, '');
+    this.setupWebSocket(host);
   }
 
   sendMessage () {
