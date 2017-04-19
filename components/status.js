@@ -33,7 +33,9 @@ export default class Status extends React.Component {
     };
   }
 
-  setupWebSocket (host) {
+  setupWebSocket () {
+    // eslint-disable-next-line no-undef
+    const host = window.document.location.host.replace(/:.*/, '');
     // eslint-disable-next-line no-undef
     this.ws = new WebSocket('ws://' + host + ':8080');
 
@@ -79,9 +81,7 @@ export default class Status extends React.Component {
   }
 
   componentDidMount () {
-    // eslint-disable-next-line no-undef
-    const host = window.document.location.host.replace(/:.*/, '');
-    this.setupWebSocket(host);
+    this.setupWebSocket();
   }
 
   sendMessage () {

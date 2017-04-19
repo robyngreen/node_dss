@@ -15,6 +15,9 @@ node_modules
 # Ignore htpasswd
 htpasswd
 
+# Ignore build file.
+deploy/build.zip
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
