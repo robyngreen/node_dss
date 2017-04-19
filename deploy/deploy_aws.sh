@@ -5,7 +5,6 @@
 #
 # Run like `./deploy/deploy_aws.sh my_eb_app my_eb_app-production`.
 #
-# That will deploy the Meteor application containing this script
 # to the `my_eb_app-production` environment of the `my_eb_app` EB application.
 
 # Propagate errors
@@ -20,7 +19,7 @@ npm run build
 # Zip all files that need to be deployed.
 zip -r deploy/build.zip .next components lib pages server.js package.json config/config.json cron.yaml htpasswd
 
-# # initialize the EB CLI tool. Use the parameters to select which Beanstalk application and environment to deploy to
+# initialize the EB CLI tool. Use the parameters to select which Beanstalk application and environment to deploy to
 # eb init $1 --platform node.js --region us-east-1
-# eb use $2
-# eb deploy --staged --timeout 40
+eb use $1
+eb deploy --timeout 40
