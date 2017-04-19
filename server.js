@@ -11,6 +11,10 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 global.appRoot = path.resolve(__dirname);
 const connectService = require('./lib/connect-service');
+const normalizePort = require('./lib/normalize-port');
+
+// Get port from environment and store in Express.
+const port = normalizePort(process.env.PORT || 3000);
 
 /**
  * Setup nconf to use (in-order):
@@ -19,10 +23,12 @@ const connectService = require('./lib/connect-service');
  *  3. Config file located in './config'
  *
  *  NOTE: Config files are gitignored and must be added manually.
+ *  We use a different config file locally.
  */
+const localConfigPath = (dev) ? 'config.local.json' : 'config.json';
 nconf.argv()
   .env()
-  .file('config/config.json');
+  .file('config/' + localConfigPath);
 
 /**
  * Authentication setup.
@@ -57,11 +63,11 @@ app.prepare()
       return handle(req, res);
     });
 
-    newServer.listen(3000, (err) => {
+    newServer.listen(port, (err) => {
       if (err) {
         throw err;
       }
-      console.log('> Ready on http://localhost:3000');
+      console.log('> Ready on http://localhost:' + port);
     });
 
     /**
