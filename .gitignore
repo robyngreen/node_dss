@@ -15,8 +15,8 @@ node_modules
 # Ignore htpasswd
 htpasswd
 
-# Ignore build directory
-deploy/build
+# Ignore build file.
+deploy/build.zip
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
