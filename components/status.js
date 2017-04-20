@@ -37,7 +37,7 @@ export default class Status extends React.Component {
     // eslint-disable-next-line no-undef
     const host = window.document.location.host.replace(/:.*/, '');
     // eslint-disable-next-line no-undef
-    this.ws = new WebSocket('ws://' + host + ':8080');
+    this.ws = new WebSocket('ws://' + host + ':5000');
 
     this.ws.onmessage = (message) => {
       console.log('======== Message received ========');
