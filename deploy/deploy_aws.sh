@@ -3,7 +3,7 @@
 # This script will compile this application and then deploy it
 # to AWS Elastic Beanstalk.
 #
-# Run like `./deploy/deploy_aws.sh my_eb_app my_eb_app-production`.
+# Run like `./deploy/deploy_aws.sh Sample-env-1`.
 #
 # to the `my_eb_app-production` environment of the `my_eb_app` EB application.
 
@@ -17,9 +17,8 @@ npm install
 npm run build
 
 # Zip all files that need to be deployed.
-zip -r deploy/build.zip .next components lib pages server.js package.json config/config.json cron.yaml htpasswd
+zip -r deploy/build.zip .ebextensions .next components lib pages server.js package.json config/config.json cron.yaml htpasswd
 
-# initialize the EB CLI tool. Use the parameters to select which Beanstalk application and environment to deploy to
-# eb init $1 --platform node.js --region us-east-1
+# initialize the EB CLI tool. Use the parameters to select which Beanstalk environment to deploy to
 eb use $1
 eb deploy --timeout 40
