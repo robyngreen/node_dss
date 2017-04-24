@@ -3,7 +3,7 @@
 # This script will compile this application and then deploy it
 # to AWS Elastic Beanstalk.
 #
-# Run like `./deploy/deploy_aws.sh Sample-env-1`.
+# Run like `./deploy/deploy_aws.sh AylaDSS-develop`.
 #
 # to the `my_eb_app-production` environment of the `my_eb_app` EB application.
 
