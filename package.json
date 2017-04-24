@@ -18,7 +18,7 @@
   "scripts": {
     "watch": "node server.js",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js"
+    "start": "npm run build && NODE_ENV=production node server.js"
   },
   "devDependencies": {},
   "engines": {
