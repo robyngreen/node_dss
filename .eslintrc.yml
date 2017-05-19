@@ -6,6 +6,7 @@ env:
 
   # Define globals exposed by Node.js.
   node: true
+  es6: true
 
 # Inherit settings from ESLint Recommended config.
 # Rules above override any rules configured here.
