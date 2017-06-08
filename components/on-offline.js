@@ -3,7 +3,6 @@ const OnOffline = ( props ) => {
     <h2 className={ (props.connectionStatus) ? 'online' : 'offline' }>
       <div className="led"></div> Status: { (props.connectionStatus) ? 'Connected to Ayla' : 'No connection from Ayla' }
       <style jsx>{`
-
         h2 {
           font-size: 1.2rem;
           font-weight: 200;
@@ -11,7 +10,9 @@ const OnOffline = ( props ) => {
         }
 
         @media screen and (min-width: 32em) {
-          font-size: 1.5rem;
+          h2 {
+            font-size: 1.5rem;
+          }
         }
 
         .led {
