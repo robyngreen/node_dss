@@ -17,6 +17,17 @@ const normalizePort = require('./lib/normalize-port');
 const port = normalizePort(process.env.PORT || 3000);
 
 /**
+ * Allow an environment variable to be used to specify which
+ * config.json file should be loaded. For instance, if
+ * process.env.APP_URL == 'dss.foo.com' nconf will look for
+ * ./config/config.dss.foo.com.json.
+ *
+ * If the APP_URL environment variable isn't set nconf will try
+ * to use ./config/config.local.json.
+ */
+const localConfigFile = process.env.APP_URL || 'local';
+
+/**
  * Setup nconf to use (in-order):
  *  1. Command-line arguments
  *  2. Environment variables
@@ -25,10 +36,9 @@ const port = normalizePort(process.env.PORT || 3000);
  *  NOTE: Config files are gitignored and must be added manually.
  *  We use a different config file locally.
  */
-const localConfigPath = (dev) ? 'config.local.json' : 'config.json';
 nconf.argv()
   .env()
-  .file('config/' + localConfigPath);
+  .file('config/config.' + localConfigFile + '.json');
 
 /**
  * Authentication setup.
@@ -51,7 +61,7 @@ app.prepare()
     }
 
     newServer.get('/api/v1/restart', (req, res) => {
-      // respond with server restarted or error.
+      // Respond with server restarted or error.
       connectService
         .start(newServer)
         .then((response) => {
@@ -67,7 +77,7 @@ app.prepare()
       if (err) {
         throw err;
       }
-      console.log('> Ready on http://localhost:' + port);
+      console.log('> Ready on localhost:' + port);
     });
 
     /**

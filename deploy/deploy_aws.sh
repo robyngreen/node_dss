@@ -17,7 +17,7 @@ npm install
 npm run build
 
 # Zip all files that need to be deployed.
-zip -r deploy/build.zip .ebextensions .next components lib pages server.js package.json config/config.json cron.yaml htpasswd
+zip -r deploy/build.zip .ebextensions .next components lib pages server.js package.json config cron.yaml htpasswd
 
 # initialize the EB CLI tool. Use the parameters to select which Beanstalk environment to deploy to
 eb use $1
