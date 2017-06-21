@@ -36,8 +36,15 @@ export default class Status extends React.Component {
   setupWebSocket () {
     // eslint-disable-next-line no-undef
     const host = window.document.location.host.replace(/:.*/, '');
+
+    // Use a different port and an unsecure connection if we're running
+    // in a local environment.
+    const webSocketURL = (host === 'localhost')
+      ? 'ws://' + host + ':5000'
+      : 'wss://' + host + ':8443';
+
     // eslint-disable-next-line no-undef
-    this.ws = new WebSocket('ws://' + host + ':5000');
+    this.ws = new WebSocket(webSocketURL);
 
     this.ws.onmessage = (message) => {
       console.log('======== Message received ========');
